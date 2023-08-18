@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>pog!</title>
+    <script src="ascii.js" referrerpolicy="same-origin"></script>
+    <link href="style.css" rel="stylesheet" />
+</head>
+<body>
+    <input type="file" id="fileInput" accept="image/*" style="display: none;" />
+    <label for="fileInput" id="fileButton">Select File</label>
+    <input type="number" id="chosenWidth" value="58"></input>
+    <button onclick="loadImg()">Load</button>
+    <div id="previews">
+        <div id="imageBox">
+            <img class="mainImage" id="preview" />
+        </div>
+        <div id="brailleBox">
+            <p class="brailleText" id="braille"></p>
+            <button onclick="navigator.clipboard.writeText(document.getElementById('braille').innerText)">Save to Clipboard</button>
+        </div>
+    </div>
+</body>
+</html>

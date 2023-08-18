@@ -1,0 +1,73 @@
+:root {
+    background-color: rgb(31, 45, 56);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: white;
+}
+
+#fileButton {
+    display: inline-block;
+    padding: 0.5rem;
+    border: 1px solid gray;
+    border-radius: 0.5rem;
+}
+
+#fileButton:hover {
+    cursor: pointer;
+    background-color: rgb(21, 33, 43);
+}
+
+#previews {
+    display: flex;
+    flex-direction: row;
+    background-color: rgb(18, 31, 41);
+    height: fit-content;
+    width: fit-content;
+    padding: 2rem;
+    border: 1px solid gray;
+    border-radius: 1rem;
+}
+
+.mainImage {
+    object-fit: contain;
+    min-height: 5rem;
+    max-width: 15rem;
+}
+
+.brailleText {
+    display: block;
+    width: fit-content;
+    height: fit-content;
+    padding: 0.5rem;
+    border: 1px solid gray;
+    border-radius: 1rem;
+    font-family: monospace;
+    color: white;
+    background-color: black;
+}
+
+.brailleText:empty::after {
+    display: block;
+    color: rgb(31, 31, 31);
+    margin: 10rem;
+    content: "nothing here yet...";
+}
+
+#imageBox {
+    display: flex;
+    min-width: 20rem;
+    background-color: rgb(20, 26, 27);
+    border: 1px solid gray;
+    border-radius: 1rem;
+    justify-content: center;
+    /* text-align: center; */
+    /* align-content: center; */
+}
+
+#brailleBox {
+    display: flex;
+    flex-direction: column;
+    background-color: rgb(20, 26, 27);
+    padding: 1rem;
+    border: 1px solid gray;
+    border-radius: 1rem;
+}
