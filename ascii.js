@@ -105,7 +105,7 @@ class BrailleImg {
      * @param {number} y
      * @returns {number}
      */
-    getBitMask(x, y) {
+    static getBitMask(x, y) {
         if (x % 2 == 0) {
             switch (y % 4) {
                 case 0:
@@ -140,7 +140,7 @@ class BrailleImg {
     setDot(x, y, val) {
         let xBytePos = Math.floor(x / 2);
         let yBytePos = Math.floor(y / 4);
-        let mask = this.getBitMask(x, y);
+        let mask = BrailleImg.getBitMask(x, y);
         if (val) {
             this.buffer[xBytePos + yBytePos * this.byteWidth] |= mask;
         } else {
