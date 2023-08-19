@@ -294,7 +294,5 @@ function loadImg() {
         let textArea = document.getElementById("braille");
         textArea.contentEditable = false;
         textArea.innerText = braille.toString(false);
-
-        let container = document.getElementById("previews");
     }
 }
