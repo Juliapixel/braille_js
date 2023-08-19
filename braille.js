@@ -14,7 +14,7 @@ const BRAILLE_CHARS = [
 '⣻', '⣼', '⣽', '⣾', '⣿'
 ];
 
-class BrailleImg {
+export default class BrailleImg {
     /**
      *
      * @param {number} width
