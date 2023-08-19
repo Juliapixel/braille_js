@@ -266,7 +266,7 @@ function addToPixel(x, y, rhs, imgData) {
         pix[1] += rhs;
         pix[2] += rhs;
 
-        pix.map((val, _, _) => {
+        pix.map((val, _i, _a) => {
             if (val > 255) {
                 val = 255;
             } else if (val < 0) {
