@@ -1,7 +1,7 @@
 "use strict";
 
 const BRAILLE_CHARS = [
-'⠁', '⠁', '⠂', '⠃', '⠄', '⠅', '⠆', '⠇', '⠈', '⠉', '⠊', '⠋', '⠌', '⠍', '⠎', '⠏', '⠐', '⠑', '⠒', '⠓', '⠔', '⠕', '⠖', '⠗', '⠘', '⠙',
+'⠀', '⠁', '⠂', '⠃', '⠄', '⠅', '⠆', '⠇', '⠈', '⠉', '⠊', '⠋', '⠌', '⠍', '⠎', '⠏', '⠐', '⠑', '⠒', '⠓', '⠔', '⠕', '⠖', '⠗', '⠘', '⠙',
 '⠚', '⠛', '⠜', '⠝', '⠞', '⠟', '⠠', '⠡', '⠢', '⠣', '⠤', '⠥', '⠦', '⠧', '⠨', '⠩', '⠪', '⠫', '⠬', '⠭', '⠮', '⠯', '⠰', '⠱', '⠲',
 '⠳', '⠴', '⠵', '⠶', '⠷', '⠸', '⠹', '⠺', '⠻', '⠼', '⠽', '⠾', '⠿', '⡀', '⡁', '⡂', '⡃', '⡄', '⡅', '⡆', '⡇', '⡈', '⡉', '⡊', '⡋',
 '⡌', '⡍', '⡎', '⡏', '⡐', '⡑', '⡒', '⡓', '⡔', '⡕', '⡖', '⡗', '⡘', '⡙', '⡚', '⡛', '⡜', '⡝', '⡞', '⡟', '⡠', '⡡', '⡢', '⡣', '⡤',
@@ -14,7 +14,7 @@ const BRAILLE_CHARS = [
 '⣻', '⣼', '⣽', '⣾', '⣿'
 ];
 
-export default class BrailleImg {
+class BrailleImg {
     /**
      *
      * @param {number} width
@@ -29,6 +29,9 @@ export default class BrailleImg {
     }
 
     /**
+     * takes an HTMLImageElement, puts its image data into a canvas, scaled to
+     * the specified width, preserving aspect ratio. applies no dithering to it,
+     * using a simple threshold filter.
      *
      * @param {HTMLImageElement} imgElement
      * @param {number} width
@@ -57,6 +60,9 @@ export default class BrailleImg {
     }
 
     /**
+     * takes an HTMLImageElement, puts its image data into a canvas, scaled to
+     * the specified width, preserving aspect ratio. applies Sierra dithering
+     * to it in order to preserve shading.
      *
      * @param {HTMLImageElement} imgElement
      * @param {number} width
@@ -72,13 +78,24 @@ export default class BrailleImg {
         ctx.drawImage(imgElement, 0, 0, imgCanvas.width, imgCanvas.height);
 
         let imgData = ctx.getImageData(0, 0, imgCanvas.width, imgCanvas.height);
+
+        // turn image into a grayscale version, with values [0, 255]
         for (let y = 0; y < imgData.height; y++) {
             for (let x = 0; x < imgData.width; x++) {
-                let [r, g, b, a] = getPixel(x, y, imgData);
-                let luma = luminance(r, g, b, a);
+                let pix = getPixel(x, y, imgData);
+                let luma = luminance(pix[0], pix[1], pix[2], pix[3]) * 255;
+                setPixel(x, y, luma, luma, luma, 255, imgData);
+            }
+        }
+
+        // takes that grayscale version, diffuses error throughout it and
+        // puts dots on braille image.
+        for (let y = 0; y < imgData.height; y++) {
+            for (let x = 0; x < imgData.width; x++) {
+                let luma = getPixel(x, y, imgData)[0];
                 let error = 0;
-                if (luma > 0.5) {
-                    error = luma - 1;
+                if (luma > 127) {
+                    error = luma - 255;
                     brailleImg.setDot(x, y, true);
                 } else {
                     error = luma;
@@ -148,11 +165,27 @@ export default class BrailleImg {
         }
     }
 
-    toString() {
+    /**
+     * returns the {@link BrailleImg} as a string, with each line separated by a
+     * newline.
+     *
+     * @param {bool} allowBlankChars if false, all blank braille characters will
+     * be replaced by a character with a single dot. necessary in most cases,
+     * since the blank character renders with a different width as non-blank
+     * ones, even in monospace fonts. (don't ask me why)
+     * @returns {string}
+     */
+    toString(allowBlankChars) {
         let out = "";
         for (let y = 0; y < this.byteHeight; y++) {
             for (let x = 0; x < this.byteWidth; x++) {
-                out += BRAILLE_CHARS[this.buffer[x + y * this.byteWidth]];
+                let val = this.buffer[x + y * this.byteWidth];
+                if (!allowBlankChars) {
+                    if (val == 0) {
+                        val = 1;
+                    }
+                }
+                out += BRAILLE_CHARS[val];
             }
             if (y != this.byteHeight - 1) {
                 out += "\n";
@@ -163,6 +196,7 @@ export default class BrailleImg {
 }
 
 /**
+ * takes RGBA values in range [0, 255] and returns luma values in range [0, 1]
  *
  * @param {number} r
  * @param {number} g
@@ -216,25 +250,30 @@ function setPixel(x, y, r, g, b, a, imgData) {
 }
 
 /**
+ * adds the provided value to every color channel of the pixel, clamping its
+ * value to the range [0, 255]
  *
  * @param {number} x
  * @param {number} y
- * @param {number} error
+ * @param {number} rhs
  * @param {ImageData} imgData
  * @returns {[number]}
  */
-function addToPixel(x, y, error, imgData) {
+function addToPixel(x, y, rhs, imgData) {
     let pix = getPixel(x, y, imgData);
     if (pix != null) {
-        let luma = luminance(pix[0], pix[1], pix[2], pix[3]);
-        luma += error;
-        if (luma < 0) {
-            luma = 0;
-        } else if (luma > 1) {
-            luma = 1;
-        }
-        luma *= 255;
-        setPixel(x, y, luma, luma, luma, pix[3], imgData);
+        pix[0] += rhs;
+        pix[1] += rhs;
+        pix[2] += rhs;
+
+        pix.map((val, _, _) => {
+            if (val > 255) {
+                val = 255;
+            } else if (val < 0) {
+                val = 0;
+            }
+        });
+        setPixel(x, y, pix[0], pix[1], pix[2], pix[3], imgData);
     }
 }
 
@@ -254,7 +293,7 @@ function loadImg() {
 
         let textArea = document.getElementById("braille");
         textArea.contentEditable = false;
-        textArea.innerText = braille.toString();
+        textArea.innerText = braille.toString(false);
 
         let container = document.getElementById("previews");
     }
