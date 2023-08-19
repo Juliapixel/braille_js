@@ -29,9 +29,9 @@ class BrailleImg {
     }
 
     /**
-     * takes an HTMLImageElement, puts its image data into a canvas, scaled to
-     * the specified width, preserving aspect ratio. applies no dithering to it,
-     * using a simple threshold filter.
+     * takes an HTMLImageElement, puts its image data into a canvas and scales
+     * to the specified width while preserving aspect ratio. applies no dithering
+     * to it, using a simple threshold filter.
      *
      * @param {HTMLImageElement} imgElement
      * @param {number} width
@@ -60,8 +60,8 @@ class BrailleImg {
     }
 
     /**
-     * takes an HTMLImageElement, puts its image data into a canvas, scaled to
-     * the specified width, preserving aspect ratio. applies Sierra dithering
+     * takes an HTMLImageElement, puts its image data into a canvas, scales to
+     * the specified width, preserving aspect ratio and applies Sierra dithering
      * to it in order to preserve shading.
      *
      * @param {HTMLImageElement} imgElement
