@@ -15,6 +15,10 @@ const BRAILLE_CHARS = [
 ];
 
 class BrailleImg {
+    #byteWidth;
+    #byteHeight;
+    #buffer;
+
     /**
      *
      * @param {number} width
@@ -23,9 +27,9 @@ class BrailleImg {
     constructor(width, height) {
         this.width = width;
         this.height = height;
-        this.byteWidth = Math.ceil(width / 2);
-        this.byteHeight = Math.ceil(height / 4);
-        this.buffer = new Uint8Array(this.byteWidth * this.byteHeight);
+        this.#byteWidth = Math.ceil(width / 2);
+        this.#byteHeight = Math.ceil(height / 4);
+        this.#buffer = new Uint8Array(this.#byteWidth * this.#byteHeight);
     }
 
     /**
@@ -159,9 +163,9 @@ class BrailleImg {
         let yBytePos = Math.floor(y / 4);
         let mask = BrailleImg.getBitMask(x, y);
         if (val) {
-            this.buffer[xBytePos + yBytePos * this.byteWidth] |= mask;
+            this.#buffer[xBytePos + yBytePos * this.#byteWidth] |= mask;
         } else {
-            this.buffer[xBytePos + yBytePos * this.byteWidth] &= (~mask);
+            this.#buffer[xBytePos + yBytePos * this.#byteWidth] &= (~mask);
         }
     }
 
@@ -177,9 +181,9 @@ class BrailleImg {
      */
     toString(allowBlankChars) {
         let out = "";
-        for (let y = 0; y < this.byteHeight; y++) {
-            for (let x = 0; x < this.byteWidth; x++) {
-                let val = this.buffer[x + y * this.byteWidth];
+        for (let y = 0; y < this.#byteHeight; y++) {
+            for (let x = 0; x < this.#byteWidth; x++) {
+                let val = this.#buffer[x + y * this.#byteWidth];
                 if (!allowBlankChars) {
                     if (val == 0) {
                         val = 1;
@@ -187,7 +191,7 @@ class BrailleImg {
                 }
                 out += BRAILLE_CHARS[val];
             }
-            if (y != this.byteHeight - 1) {
+            if (y != this.#byteHeight - 1) {
                 out += "\n";
             }
         }
