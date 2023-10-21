@@ -295,8 +295,10 @@ function loadImg() {
         const brailleWidth = document.getElementById("chosenWidth").value;
         let braille = BrailleImg.fromImageElementDithered(imgElement, brailleWidth);
 
+        let blank_chars_opt = document.getElementById("allowBlankChars").checked;
+
         let textArea = document.getElementById("braille");
         textArea.contentEditable = false;
-        textArea.innerText = braille.toString(false);
+        textArea.innerText = braille.toString(blank_chars_opt);
     }
 }
